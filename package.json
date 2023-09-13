@@ -1,0 +1,42 @@
+{
+  "name": "sqlite-map",
+  "version": "0.1.0",
+  "description": "Simple javascript persistent map and array datastructures based on sqlite",
+  "license": "ISC",
+  "author": "Amit",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "type": "module",
+  "repository": "amit13k/sqlite-map",
+  "files": [
+    "/lib"
+  ],
+  "scripts": {
+    "dev": "vite-node src/index.ts",
+    "test": "vitest",
+    "build": "tsc",
+    "lint": "eslint --ext .js,.ts ."
+  },
+  "keywords": [
+    "persistent map",
+    "persistent storage",
+    "sqlite"
+  ],
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.4",
+    "@types/node": "^20.6.0",
+    "@typescript-eslint/eslint-plugin": "^6.6.0",
+    "eslint": "^8.49.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-config-strict": "^14.0.1",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier-plugin-jsdoc": "^1.0.2",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9",
+    "vite-node": "^0.34.4",
+    "vitest": "^0.34.4"
+  },
+  "peerDependencies": {
+    "better-sqlite3": "^8.x.x"
+  }
+}
