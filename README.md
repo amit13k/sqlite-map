@@ -109,3 +109,42 @@ const messages = factory.getArray<string>(
 messages.push("value1");
 console.log([...messages]);
 ```
+
+## Related data
+
+The library also provides simple ways to work with related data (however these require full table scan to find/delete related data). We can pass a third parameter to the set function to associate related ids. The `set()` call will create the corresponding columns in sqlite table to hold these related values (internally stored as comma separated values).
+
+Later we can get all rows that have any of the related id's by using `getRelated()`. `getRelated/deleteRelated` are only convenience features and have performance issue because they perform a complete table scan to filter rows.
+
+```ts
+const database = new Database(":memory:");
+
+const factory = createBetterSqlite3Factory({
+  database,
+});
+
+type User = {
+  id: string;
+};
+
+type Post = {
+  content: string;
+};
+
+const users = factory.getMap<User>("users");
+
+/**
+ * By providing the second generic paramter ["user_id"] we can get
+ * typesafety/suggestions when trying to associate related ids
+ */
+const posts = factory.getMap<Post, ["user_id"]>("posts");
+
+users.set("user1", { id: "user1" });
+
+// we can associate one or more user_ids with the post
+posts.set("post1", { content: "post1" }, { user_id: ["user1"] });
+posts.set("post2", { content: "post2" }, { user_id: ["user1"] });
+
+// we can get all posts that match any of the user_ids
+console.log([...posts.getRelated({ user_id: ["user1"] })]);
+```

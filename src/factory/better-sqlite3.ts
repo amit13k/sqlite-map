@@ -1,7 +1,12 @@
 import BetterSqlite3 from "better-sqlite3";
 import { createArray } from "../array/array.js";
 import * as BetterSqlite3Map from "../map/better-sqlite3.js";
-import { DEFAULT_SERIALIZER, Serializer, StorageFactory } from "./factory.js";
+import {
+  DEFAULT_SERIALIZER,
+  GetMapOptions,
+  Serializer,
+  StorageFactory,
+} from "./factory.js";
 
 /**
  * Creates a StorageFactory that uses BetterSqlite3 as the underlying storage.
@@ -24,18 +29,18 @@ export function create(options: {
 
   const getMap: StorageFactory["getMap"] = (
     name: string,
-    options?:
-      | {
-          format: "text";
-          serializer?: Serializer<string>;
-        }
-      | {
-          format: "binary";
-          serializer?: Serializer<Uint8Array>;
-        },
+    options?: GetMapOptions,
   ) => {
-    const format = options?.format ?? "text";
-    const serializer = options?.serializer ?? DEFAULT_SERIALIZER[format];
+    let format: "text" | "binary" | undefined;
+    let serializer: Serializer<any> | undefined;
+
+    if (options?.format) {
+      format = options.format === "text" ? "text" : "binary";
+      serializer = options?.serializer ?? DEFAULT_SERIALIZER[format];
+    } else {
+      format = "text";
+      serializer = DEFAULT_SERIALIZER[format];
+    }
 
     getOrCreateTable(name, format);
     return BetterSqlite3Map.create(db, name, serializer);

@@ -82,3 +82,135 @@ test("use non existent table", () => {
   expect(() => map.forEach(() => {})).throws();
   expect(() => [...map]).throws();
 });
+
+test("set related ids", () => {
+  const database = new BetterSqlite3(":memory:");
+
+  type User = {
+    name: string;
+  };
+
+  type Post = {
+    content: string;
+  };
+
+  createTable(database, "map1");
+  createTable(database, "map2");
+
+  const users = create<User, []>(database, "map1", jsonTextSerializer);
+  const posts = create<Post, ["user_id"]>(database, "map2", jsonTextSerializer);
+
+  users.set("user1", { name: "user1" });
+  users.set("user2", { name: "user2" });
+
+  posts.set("post1", { content: "post1" }, { user_id: ["user1"] });
+  posts.set("post2", { content: "post2" }, { user_id: ["user2"] });
+
+  expect(posts.getRelated({ user_id: ["user1"] })).toEqual([
+    {
+      key: "post1",
+      value: { content: "post1" },
+      relations: { user_id: ["user1"] },
+    },
+  ]);
+
+  expect(posts.getRelated({ user_id: ["user2"] })).toEqual([
+    {
+      key: "post2",
+      value: { content: "post2" },
+      relations: { user_id: ["user2"] },
+    },
+  ]);
+
+  expect(posts.getRelated({ user_id: ["user1", "user2"] })).toEqual([
+    {
+      key: "post1",
+      value: { content: "post1" },
+      relations: { user_id: ["user1"] },
+    },
+    {
+      key: "post2",
+      value: { content: "post2" },
+      relations: { user_id: ["user2"] },
+    },
+  ]);
+
+  expect(posts.getRelated()).toEqual([
+    {
+      key: "post1",
+      value: { content: "post1" },
+      relations: { user_id: ["user1"] },
+    },
+    {
+      key: "post2",
+      value: { content: "post2" },
+      relations: { user_id: ["user2"] },
+    },
+  ]);
+});
+
+test("add related data", () => {
+  const database = new BetterSqlite3(":memory:");
+
+  type User = {
+    name: string;
+  };
+
+  type Post = {
+    content: string;
+  };
+
+  createTable(database, "map1");
+  createTable(database, "map2");
+
+  const users = create<User, []>(database, "map1", jsonTextSerializer);
+  const posts = create<Post, ["user_id"]>(database, "map2", jsonTextSerializer);
+
+  users.set("user1", { name: "user1" });
+  users.set("user2", { name: "user2" });
+
+  posts.addRelated({ content: "post1" }, { user_id: ["user1"] });
+  posts.addRelated({ content: "post2" }, { user_id: ["user2"] });
+
+  const user1Posts = posts.getRelated({ user_id: ["user1"] });
+  const user2Posts = posts.getRelated({ user_id: ["user2"] });
+
+  user1Posts.forEach((x) => expect(x.value.content).toBe("post1"));
+
+  user2Posts.forEach((x) => expect(x.value.content).toBe("post2"));
+});
+
+test("delete related data", () => {
+  const database = new BetterSqlite3(":memory:");
+
+  type User = {
+    name: string;
+  };
+
+  type Post = {
+    content: string;
+  };
+
+  createTable(database, "map1");
+  createTable(database, "map2");
+
+  const users = create<User, []>(database, "map1", jsonTextSerializer);
+  const posts = create<Post, ["user_id"]>(database, "map2", jsonTextSerializer);
+
+  users.set("user1", { name: "user1" });
+  users.set("user2", { name: "user2" });
+
+  posts.addRelated({ content: "post1" }, { user_id: ["user1"] });
+  posts.addRelated({ content: "post2" }, { user_id: ["user2"] });
+
+  expect(posts.getRelated({ user_id: ["user1"] }).length).toBe(1);
+  expect(posts.getRelated({ user_id: ["user2"] }).length).toBe(1);
+
+  posts.deleteRelated({ user_id: ["user1"] });
+
+  expect(posts.getRelated({ user_id: ["user1"] })).toEqual([]);
+
+  posts.deleteRelated({ user_id: ["user2"] });
+
+  expect(posts.getRelated({ user_id: ["user2"] })).toEqual([]);
+});
