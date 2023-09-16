@@ -1,6 +1,6 @@
 {
   "name": "sqlite-map",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Simple javascript persistent map and array datastructures based on better-sqlite3",
   "license": "ISC",
   "author": "Amit",

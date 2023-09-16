@@ -21,7 +21,7 @@ export type SuperArray<T> = {
   set(index: number, value: T): void;
 };
 
-export function createArray<T, MapType extends SuperMap<T>>(
+export function createArray<T, MapType extends SuperMap<T, []>>(
   map: MapType,
   defaultValue: T,
 ): SuperArray<T> {

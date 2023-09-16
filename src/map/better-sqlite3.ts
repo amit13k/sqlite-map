@@ -162,7 +162,7 @@ export function create<T, Relations extends string[]>(
           const values = new Set(columnValues.split(","));
 
           if (relations) {
-            let queryValues = relations[key as Relations[number]] ?? [];
+            const queryValues = relations[key as Relations[number]] ?? [];
 
             if (queryValues.length === 0) continue;
 
